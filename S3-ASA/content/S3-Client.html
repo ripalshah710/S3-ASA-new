@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>S3 - Client : To upload and Download from S3 Bucket</title>
+    <!-- Latest compiled and minified CSS  -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3"><input type="text" id="ResultPresignedS3Url" placeholder="Enter Presigned Upload Url" value="" /></div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3">
+                <div class="custom-file">
+                    <p id="presignedUrlToDisplay"></p>
+                    <input type="file" class="custom-file-input" id="inputFile" name="Adfile" accept=".txt,.pdf,.png,.jpg,.xml">
+                </div>
+            </div>
+            <div class="col-12 col-md-6 offset-md-3 mt-4">
+                <button id="savefileButton" type="button" class="btn btn-primary" data-english="Save File">Upload File</button>
+            </div>
+        </div>
+        <br />
+        <hr />
+        <br />
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3">
+                <input type="text" id="ResultPresignedS3DownloadUrl" placeholder="Enter Presigned Download Url" value="" />
+            </div>
+            <div class="col-12 col-md-6 offset-md-3 mt-4">
+                <button id="downloadfileButton" type="button" class="btn btn-primary" data-english="Save File">Download File</button>
+            </div>
+        </div>
+        <div id="debug">
+
+        </div>
+    </div>
+
+    <script>
+        $("#downloadfileButton").click(function () {
+            function downloadFile(url) {
+                debugger;
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data)
+                        document.querySelector('#debug').innerText = data
+                    })
+            }
+            var url = document.getElementById("ResultPresignedS3DownloadUrl").value;
+            downloadFile(url);
+        });
+    </script>
+    <script>
+        $("#savefileButton").click(function () {
+            // upload handler
+            function uploadFile() {
+                var file = document.getElementById('inputFile').files[0];
+                var contentType = file.type;
+                var presignedUrl = $('#ResultPresignedS3Url').val()
+                debugger;
+                $.ajax({
+                    type: 'PUT',
+                    url: presignedUrl,
+                    // Content type must much with the parameter you signed your URL with
+                    contentType: contentType,
+                    crossDomain: true,
+                    // this flag is important, if not set, it will try to send data as a form
+                    processData: false,
+                    // the actual file is sent
+                    data: file,
+                    success: function (data, status, xhr) {
+                        alert("Upload success");
+                    },
+                    error: function (error) {
+                        debugger;
+                        alert('File NOT uploaded' + error);
+                    },
+                    // Monitoring of progress
+                    xhr: function () {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener("progress", function (evt) {
+                            if (evt.lengthComputable) {
+                               //Do something with upload progress here
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                });
+            }
+            // When button pressed
+            uploadFile();
+        });
+    </script>
+
+
+</body>
+</html>

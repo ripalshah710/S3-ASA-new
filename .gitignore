@@ -4,3 +4,5 @@
 
 /S3-ASA/obj
 /S3-ASA/bin
+/S3-Client/bin/Debug/netcoreapp3.1
+/S3-Client/obj

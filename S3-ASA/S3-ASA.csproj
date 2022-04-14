@@ -12,6 +12,8 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.4.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.8.17" />
+    <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.2.28" />
+    <PackageReference Include="FluentFTP" Version="37.0.2" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 </Project>

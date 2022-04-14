@@ -6,7 +6,25 @@
     "SimpleS3":{
      "Type": "AWS::S3::Bucket",
      "Properties" : {
-        "BucketName" : "ftp-operation"
+        "BucketName" : "ftp-operation",
+        "CorsConfiguration":{
+            "CorsRules": [
+                {
+                    "AllowedHeaders": ["*"],
+                    "AllowedMethods": [
+                         "GET",
+                        "PUT",
+                        "POST",
+                        "DELETE",
+                        "HEAD"
+                    ],
+                    "AllowedOrigins": ["*"],
+                    "ExposedHeaders": [],
+                    "Id": "ftp-operation-core-rules",
+                    "MaxAge": 3000
+                }
+            ]
+        }
      }
     },
     "ScheduledTimer":{
@@ -22,7 +40,6 @@
             "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
             "Environment": {
              "Variables" : {
-              "DB_CONNECTION": "Data Source=172.17.34.228;Initial Catalog=tx_r16;user id=devteam;password=H0ll1ster~",
               "BUCKET_NAME": "ftp-operation",
               "FILE_NAME": "session_updated.xml",
               "PATH_NAME": "DailySessionList"
@@ -61,7 +78,6 @@
         "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
         "Environment": {
              "Variables" : {
-              "DB_CONNECTION": "Data Source=172.17.34.228;Initial Catalog=tx_r16;user id=devteam;password=H0ll1ster~",
               "BUCKET_NAME": "ftp-operation",
               "FILE_NAME": "session_updated.xml",
               "PATH_NAME": "DailySessionList"
@@ -100,7 +116,6 @@
         "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
         "Environment": {
              "Variables" : {
-              "DB_CONNECTION": "Data Source=172.17.34.228;Initial Catalog=tx_r16;user id=devteam;password=H0ll1ster~",
               "BUCKET_NAME": "ftp-operation",
               "FILE_NAME": "session_updated.xml",
               "PATH_NAME": "DailySessionList"
@@ -187,6 +202,132 @@
             "Type": "Api",
             "Properties": {
               "Path": "/client-download",
+              "Method": "GET"
+            }
+          }
+        },
+        "VpcConfig": {
+                "SecurityGroupIds": [
+                   "sg-0bbd7d38acdd3dc18"
+                  ],
+                "SubnetIds":[
+                  "subnet-001e3983a9fe5576a",
+                  "subnet-002500af93aa39ce5"
+                  ]
+               }
+      }
+    },
+      "UploadFTP": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "S3-ASA-OnDembad-Upload-FTP",
+        "Description": "A Lambda function that upload file in FTP on Demand",
+        "Handler": "S3-ASA::S3_ASA.Functions::UploadFTP",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Environment": {
+             "Variables" : {
+              "BUCKET_NAME": "ftp-operation",
+              "FILE_NAME": "session_updated.xml",
+              "PATH_NAME": "DailySessionList",
+              "FTP_SERVER":"",
+              "FTP_USER_NAME":"",
+              "FTP_PASSWORD":"",
+              "FTP_PORT":"",
+              "FTP_FILE_PATH":"DailySessionList",
+              "FTP_FILE_NAME":"session_updated.xml"
+              }
+            },
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/upload-ftp",
+              "Method": "GET"
+            }
+          }
+        },
+        "VpcConfig": {
+                "SecurityGroupIds": [
+                   "sg-0bbd7d38acdd3dc18"
+                  ],
+                "SubnetIds":[
+                  "subnet-001e3983a9fe5576a",
+                  "subnet-002500af93aa39ce5"
+                  ]
+               }
+      }
+    },
+    "DownloadFTP": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "S3-ASA-OnDembad-Download-FTP",
+        "Description": "A Lambda function that download file in FTP on Demand",
+        "Handler": "S3-ASA::S3_ASA.Functions::DownloadFTP",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Environment": {
+             "Variables" : {
+              "BUCKET_NAME": "ftp-operation",
+              "FILE_NAME": "session_updated.xml",
+              "PATH_NAME": "DailySessionList",
+              "FTP_SERVER":"",
+              "FTP_USER_NAME":"",
+              "FTP_PASSWORD":"",
+              "FTP_PORT":"",
+              "FTP_FILE_PATH":"DailySessionList",
+              "FTP_FILE_NAME":"session_updated.xml"
+              }
+            },
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/download-ftp",
+              "Method": "GET"
+            }
+          }
+        },
+        "VpcConfig": {
+                "SecurityGroupIds": [
+                   "sg-0bbd7d38acdd3dc18"
+                  ],
+                "SubnetIds":[
+                  "subnet-001e3983a9fe5576a",
+                  "subnet-002500af93aa39ce5"
+                  ]
+               }
+      }
+    },
+    "S3ClientUrl": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "S3-ASA-Client-S3-HTML",
+        "Description": "A Lambda function that upload / download file in S3 on Client",
+        "Handler": "S3-ASA::S3_ASA.Functions::S3ClientUrl",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Environment": {
+             "Variables" : {
+              "BUCKET_NAME": "ftp-operation",
+              "FILE_NAME": "session_updated.xml",
+              "PATH_NAME": "DailySessionList"
+              }
+            },
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/s3-client",
               "Method": "GET"
             }
           }
