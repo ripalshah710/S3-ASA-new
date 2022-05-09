@@ -69,6 +69,7 @@ namespace S3_ASA
         public async Task<APIGatewayProxyResponse> UploadS3(APIGatewayProxyRequest request, ILambdaContext context)
         {
             context.Logger.LogLine("Get Request\n");
+            
             await GetDataFromDBPush(context, UploadType.S3);
             var response = new APIGatewayProxyResponse
             {
@@ -108,7 +109,8 @@ namespace S3_ASA
         {
             context.Logger.LogLine("Get Request\n");
             string fileName = request.QueryStringParameters["filename"].ToLower();
-            var url = GeneratePreSignedURL(timeoutDuration, fileName, HttpVerb.PUT);
+            string contentType = request.QueryStringParameters["contenttype"].ToLower();
+            var url = GeneratePreSignedURL(timeoutDuration, fileName, HttpVerb.PUT, contentType);
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -127,7 +129,7 @@ namespace S3_ASA
         public APIGatewayProxyResponse ClientDownloadS3(APIGatewayProxyRequest request, ILambdaContext context)
         {
             context.Logger.LogLine("Get Request\n");
-            var url = GeneratePreSignedURL(timeoutDuration, string.Empty, HttpVerb.GET);
+            var url = GeneratePreSignedURL(timeoutDuration, string.Empty, HttpVerb.GET, string.Empty);
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
@@ -355,7 +357,7 @@ namespace S3_ASA
             return responseBody;
         }
 
-        private string GeneratePreSignedURL(double duration, string fileName, Amazon.S3.HttpVerb httpVerb)
+        private string GeneratePreSignedURL(double duration, string fileName, Amazon.S3.HttpVerb httpVerb, string contentType)
         {
             if (string.IsNullOrEmpty(fileName))
             {
@@ -366,7 +368,9 @@ namespace S3_ASA
                 BucketName = BucketName,
                 Key = $"{Path}/{fileName}",
                 Verb = httpVerb,
-                Expires = DateTime.UtcNow.AddHours(duration)
+                Expires = DateTime.UtcNow.AddHours(duration),
+                ContentType = contentType
+
             };
             //request.Headers["x-amz-acl"] = "public-read";
 

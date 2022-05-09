@@ -6,13 +6,13 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "SSO",
+    "profile"     : "SSO-Hardik",
     "region"      : "us-east-1",
     "configuration" : "Release",
     "framework"     : "netcoreapp3.1",
     "s3-prefix"     : "S3-ASA/",
     "template"      : "serverless.template",
-    "template-parameters" : "",
+    "template-parameters" : "\"LambdaRole\"=\"{{resolve:ssm:LambdaExecutionRole:1}}\";\"APIUrl\"=\"{{resolve:ssm:CoonectionAPIUrl:2}}\"",
     "s3-bucket"           : "aws-sam-cli-managed-default-samclisourcebucket-1bgqehuifygis",
     "stack-name"          : "S3-ASA"
 }

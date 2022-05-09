@@ -2,6 +2,18 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application.",
+   "Parameters" : {
+  "LambdaRole" : {
+    "Type" : "String",
+    "Default" : "{{resolve:ssm:LambdaExecutionRole:1}}",
+    "Description" : "Lambda Role ARN"
+  },
+  "APIUrl" : {
+    "Type" : "String",
+    "Default" : "{{resolve:ssm:CoonectionAPIUrl:2}}",
+    "Description" : "DB Connection API URL"
+  }
+},
   "Resources": {
     "SimpleS3":{
      "Type": "AWS::S3::Bucket",
@@ -27,6 +39,58 @@
         }
      }
     },
+    "S3Api": {
+      "Type": "AWS::Serverless::Api",
+      "Properties": {
+        "Name" : "S3-APIs",
+        "StageName": "Dev",
+        "Auth":{
+            "DefaultAuthorizer":"MyLambdaRequestAuthorizer",
+            "Authorizers":{
+                "MyLambdaRequestAuthorizer":{
+                    "FunctionPayloadType":"REQUEST",
+                    "FunctionArn" : { 
+                        "Fn::GetAtt" : [ 
+                            "LambdaAuthorizer", 
+                            "Arn" 
+                          ] 
+                        },
+                    "Identity":{
+                        "Headers" : [
+                            "userName",
+                            "passWord "
+                        ]
+                    }
+                }
+            }
+        },
+        "BinaryMediaTypes": [
+          "*~1*"
+        ]
+      }
+    },
+    "LambdaAuthorizer":{
+     "Type": "AWS::Serverless::Function",
+        "Properties": {
+            "FunctionName": "S3-Custom-Authorizer",
+            "Description": "A Lambda function that authorize the different API Gateway",
+            "CodeUri": "",
+            "Handler": "S3-ASA::S3_ASA.Authorizer::Get",
+            "Runtime": "dotnetcore3.1",
+            "MemorySize": 256,
+            "Timeout": 30,
+            "Role": { "Ref" : "LambdaRole"},
+            "Events": {
+                "RootGet": {
+                "Type": "Api",
+                "Properties": {
+                    "Path": "/",
+                    "Method": "GET"
+                }
+                }
+            }
+          }
+        },
     "ScheduledTimer":{
         "Type": "AWS::Serverless::Function",
         "Properties": {
@@ -37,7 +101,7 @@
             "Runtime": "dotnetcore3.1",
             "MemorySize": 256,
             "Timeout": 30,
-            "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+            "Role": { "Ref" : "LambdaRole"},
             "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -75,7 +139,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -88,7 +152,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -113,7 +180,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -126,7 +193,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/download",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -151,7 +221,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -164,7 +234,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/client-upload",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -189,7 +262,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -202,7 +275,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/client-download",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -227,7 +303,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -246,7 +322,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/upload-ftp",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -271,7 +350,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -290,7 +369,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/download-ftp",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
@@ -315,7 +397,7 @@
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
-        "Role": "arn:aws:iam::471808368523:role/service-role/test2-lambda-role-dlnort4p",
+        "Role": { "Ref" : "LambdaRole"},
         "Environment": {
              "Variables" : {
               "BUCKET_NAME": "ftp-operation",
@@ -328,7 +410,10 @@
             "Type": "Api",
             "Properties": {
               "Path": "/s3-client",
-              "Method": "GET"
+              "Method": "GET",
+              "RestApiId": {
+                "Ref": "S3Api"
+              }
             }
           }
         },
