@@ -7,11 +7,6 @@
     "Type" : "String",
     "Default" : "{{resolve:ssm:LambdaExecutionRole:1}}",
     "Description" : "Lambda Role ARN"
-  },
-  "APIUrl" : {
-    "Type" : "String",
-    "Default" : "{{resolve:ssm:CoonectionAPIUrl:2}}",
-    "Description" : "DB Connection API URL"
   }
 },
   "Resources": {
