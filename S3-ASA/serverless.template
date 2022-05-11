@@ -7,6 +7,11 @@
     "Type" : "String",
     "Default" : "{{resolve:ssm:LambdaExecutionRole:1}}",
     "Description" : "Lambda Role ARN"
+  },
+  "UserPoolArn" : {
+    "Type" : "String",
+    "Default" : "{{resolve:ssm:CognitoAuthorizerUserPoolArn:1}}",
+    "Description" : "Cognito Authorizer User Pool Arn"
   }
 },
   "Resources": {
@@ -34,7 +39,7 @@
         }
      }
     },
-    "S3Api": {
+    "S3UserApi": {
       "Type": "AWS::Serverless::Api",
       "Properties": {
         "Name" : "S3-APIs",
@@ -56,6 +61,18 @@
                             "passWord "
                         ]
                     }
+                },
+                "MyCognitoAuthorizer":{
+                    "AuthorizationScopes":[
+                    "connection/connection.read",
+                    "api-users/add"
+                    ],
+                    "UserPoolArn" : { "Ref" : "UserPoolArn"},
+                    "Identity":{
+                        "Headers" : "Authorization",
+                        "ValidationExpression" : "Bearer.*",
+                        "ReauthorizeEvery" : 30
+                    }
                 }
             }
         },
@@ -64,6 +81,7 @@
         ]
       }
     },
+    
     "LambdaAuthorizer":{
      "Type": "AWS::Serverless::Function",
         "Properties": {
@@ -148,8 +166,11 @@
             "Properties": {
               "Path": "/",
               "Method": "GET",
+              "Auth":{
+               "Authorizer" : "MyLambdaRequestAuthorizer"
+              },
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
@@ -189,8 +210,11 @@
             "Properties": {
               "Path": "/download",
               "Method": "GET",
+              "Auth":{
+               "Authorizer" : "MyLambdaRequestAuthorizer"
+              },
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
@@ -230,8 +254,11 @@
             "Properties": {
               "Path": "/client-upload",
               "Method": "GET",
+              "Auth":{
+               "Authorizer" : "MyCognitoAuthorizer"
+              },
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
@@ -271,8 +298,11 @@
             "Properties": {
               "Path": "/client-download",
               "Method": "GET",
+               "Auth":{
+               "Authorizer" : "MyCognitoAuthorizer"
+              },
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
@@ -319,7 +349,7 @@
               "Path": "/upload-ftp",
               "Method": "GET",
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
@@ -366,7 +396,7 @@
               "Path": "/download-ftp",
               "Method": "GET",
               "RestApiId": {
-                "Ref": "S3Api"
+                "Ref": "S3UserApi"
               }
             }
           }
