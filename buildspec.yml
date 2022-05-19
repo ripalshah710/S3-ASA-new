@@ -16,7 +16,7 @@ phases:
       - dotnet publish -c release -o ./build_output S3-ASA.csproj
 #      - sam package --template-file serverless.template --output-template-file serverless.yml --s3-bucket serverless-test-404
       - sam package --debug --template-file serverless.template --resolve-s3 --output-template-file serverless.yaml
-      - sam deploy --template-file serverless.yaml --stack-name Connection-Service --capabilities CAPABILITY_IAM
+      - sam deploy --template-file serverless.yaml --stack-name S3-ASA --capabilities CAPABILITY_IAM
 #      - sam deploy --template-file /codebuild/output/src150827008/src/S3-ASA/serverless.yaml --stack-name S3-ASA-Stack-demo
 #artifacts:
 #  type: zip
